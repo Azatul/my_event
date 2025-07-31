@@ -1,0 +1,134 @@
+defmodule MyEventWeb.AdminSidebarLiveComponent do
+  use MyEventWeb, :live_component
+
+  def update(assigns, socket) do
+    {:ok,
+     socket
+     |> assign(assigns)
+     |> assign_new(:dashboard_expanded, fn -> false end)
+     |> assign_new(:collapsed, fn -> false end)}
+  end
+
+  def render(assigns) do
+    ~H"""
+    <aside class={
+      if @collapsed,
+        do: "fixed top-0 left-0 w-16 h-[calc(100vh-4rem)] bg-white bg-opacity-90 backdrop-blur-md shadow-xl flex flex-col justify-between z-50",
+        else: "fixed top-0 left-0 w-64 h-[calc(100vh-4rem)] bg-white bg-opacity-90 backdrop-blur-md shadow-xl flex flex-col justify-between z-50"
+    }>
+      <!-- Toggle Collapse -->
+      <div class="p-4 border-b border-gray-300 flex justify-between items-center">
+        <button
+          phx-click="toggle_collapse"
+          phx-target={@myself}
+          class="text-gray-700 text-lg focus:outline-none"
+        >
+          <%= if @collapsed, do: "☰", else: "✕" %>
+        </button>
+      </div>
+
+      <!-- Menu -->
+      <div class="p-4">
+        <h2 :if={!@collapsed} class="text-xl font-bold text-gray-800 mb-4">Admin Menu</h2>
+
+        <ul class="space-y-2 text-gray-700">
+          <!-- Dashboard Section -->
+          <li>
+            <button
+              phx-click="toggle_dashboard"
+              phx-target={@myself}
+              class="w-full text-left p-2 rounded-lg hover:bg-gray-200 transition font-medium"
+            >
+              <%= if @collapsed, do: "📊", else: "📊 Dashboard" %>
+            </button>
+
+            <%= if @dashboard_expanded && !@collapsed do %>
+              <ul class="ml-4 mt-2 space-y-1 text-sm text-gray-600">
+                <li>
+                  <button
+                    phx-click="dashboard_overview"
+                    phx-target={@myself}
+                    class="w-full text-left p-2 rounded-md hover:bg-gray-100 transition"
+                  >
+                    Registered Users
+                  </button>
+                </li>
+                <li>
+                  <button
+                    phx-click="dashboard_events"
+                    phx-target={@myself}
+                    class="w-full text-left p-2 rounded-md hover:bg-gray-100 transition"
+                  >
+                    Manage Events
+                  </button>
+                </li>
+              </ul>
+            <% end %>
+          </li>
+
+          <!-- Settings -->
+          <li>
+            <button
+              phx-click="show_settings"
+              phx-target={@myself}
+              class="w-full text-left p-2 rounded-lg hover:bg-gray-200 transition font-medium"
+            >
+              <%= if @collapsed, do: "⚙️", else: "⚙️ Settings" %>
+            </button>
+          </li>
+
+          <!-- Log Out -->
+          <li>
+            <.link
+              href={~p"/admins/log_out"}
+              method="delete"
+              class="w-full text-left block p-2 rounded-lg hover:bg-red-100 text-red-600 font-medium transition"
+            >
+              <%= if @collapsed, do: "🚪", else: "🚪 Log out" %>
+            </.link>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Footer -->
+      <div class="p-4 border-t border-gray-300 text-sm text-gray-500">
+        <%= if !@collapsed do %>
+          Logged in as: <span class="font-semibold text-gray-700">Admin</span>
+        <% else %>
+          👤
+        <% end %>
+      </div>
+    </aside>
+    """
+  end
+
+  # Event handlers
+  def handle_event("toggle_dashboard", _params, socket) do
+    {:noreply, update(socket, :dashboard_expanded, &(!&1))}
+  end
+
+  def handle_event("toggle_collapse", _params, socket) do
+    {:noreply, update(socket, :collapsed, &(!&1))}
+  end
+
+  def handle_event("dashboard_overview", _params, socket) do
+    send(self(), {:switch_page, :admin_dashboard_overview})
+    {:noreply, socket}
+  end
+
+  def handle_event("dashboard_events", _params, socket) do
+    send(self(), {:switch_page, :admin_dashboard_events})
+    {:noreply, socket}
+  end
+
+  def handle_event("show_settings", _params, socket) do
+    send(self(), {:switch_page, :admin_settings})
+    {:noreply, socket}
+  end
+
+  def handle_event("show_registered_users", _params, socket) do
+    send(self(), {:switch_page, :admin_registered_users})
+    {:noreply, socket}
+  end
+
+end

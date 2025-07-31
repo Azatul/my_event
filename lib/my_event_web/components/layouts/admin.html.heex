@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en" class="[scrollbar-gutter:stable]">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="csrf-token" content={get_csrf_token()} />
+    <.live_title suffix=" · MyEvent Admin">
+      {assigns[:page_title] || "Admin Panel"}
+    </.live_title>
+    <link phx-track-static rel="stylesheet" href={~p"/assets/app.css"} />
+    <script defer phx-track-static type="text/javascript" src={~p"/assets/app.js"}></script>
+  </head>
+  <body class="bg-white">
+    <header class="bg-zinc-100 p-4 border-b text-sm flex justify-between items-center">
+      <div class="font-bold text-zinc-700">MyEvent Admin</div>
+      <div class="flex items-center gap-4 text-zinc-800">
+        <span><%= @current_admin.email %></span>
+        <.link href={~p"/admins/settings"} class="hover:underline">Settings</.link>
+        <.link href={~p"/admins/log_out"} method="delete" class="hover:underline">Log out</.link>
+      </div>
+    </header>
+
+    <main class="p-6">
+      <.flash_group flash={@flash} />
+      {@inner_content}
+    </main>
+  </body>
+</html>
